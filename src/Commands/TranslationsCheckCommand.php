@@ -39,15 +39,21 @@ class TranslationsCheckCommand extends Command
             }
         }
 
-        if (config('laravel-translation-checker.save_error_log_file', true)) {
-            file_put_contents(storage_path(sprintf('logs/patryqhyper_laravel_translation_checker_error_log_%s.log', today()->format('Y-m-d_H_i_s'))), sprintf('PatryQHyper/LaravelTranslationChecker error log. Date %s', now()->format('Y-m-d H:i:s')) . PHP_EOL . PHP_EOL . json_encode($missingKeys, JSON_PRETTY_PRINT));
+        if (count($missingKeys) > 0) {
+            if (config('laravel-translation-checker.save_error_log_file', true)) {
+                file_put_contents(storage_path(sprintf('logs/patryqhyper_laravel_translation_checker_error_log_%s.log', today()->format('Y-m-d_H_i_s'))), sprintf('PatryQHyper/LaravelTranslationChecker error log. Date %s', now()->format('Y-m-d H:i:s')) . PHP_EOL . PHP_EOL . json_encode($missingKeys, JSON_PRETTY_PRINT));
+            }
+
+            $this->components->twoColumnDetail('Key', 'Locale');
+            foreach ($missingKeys as $locale => $keys) {
+                foreach ($keys as $key) {
+                    $this->components->twoColumnDetail($key, $locale);
+                }
+            }
+
+            return;
         }
 
-        $this->components->twoColumnDetail('Key', 'Locale');
-        foreach ($missingKeys as $locale => $keys) {
-            foreach ($keys as $key) {
-                $this->components->twoColumnDetail($key, $locale);
-            }
-        }
+        $this->components->success('Missing translation keys not found');
     }
 }
